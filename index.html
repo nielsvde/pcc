@@ -20,6 +20,44 @@
       background-color: var(--bg); color: var(--text);
       margin: 0; padding: 0; display: flex; justify-content: center;
     }
+
+    /* --- ANIMATED SPLASH SCREEN (ANDROID / PWA) --- */
+    #splash-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background-color: var(--primary);
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      z-index: 9999;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    #splash-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .splash-logo {
+      width: 90px; height: 90px;
+      animation: pulseZoom 1.4s ease-in-out infinite alternate;
+    }
+    .splash-spinner {
+      margin-top: 20px;
+      width: 32px; height: 32px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #ffffff;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes pulseZoom {
+      0% { transform: scale(0.92); opacity: 0.85; }
+      100% { transform: scale(1.08); opacity: 1; }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    /* ------------------------------------------- */
+
     .card {
       background: var(--card-bg); padding: 8px 12px 16px 12px; border-radius: 0;
       box-shadow: none; width: 100%; max-width: 100%; box-sizing: border-box; text-align: center;
@@ -92,10 +130,8 @@
       background: #e1eeef; font-size: 0.85rem; font-weight: 600; color: #555; cursor: pointer; border-radius: 8px 8px 0 0;
       text-align: center;
     }
-    /* Actieve sub-tabblad wit gemaakt en de onderrand/scheidslijn weggelaten */
     .tab-btn.active { background: #ffffff; color: var(--primary); font-weight: 700; border-bottom: 0px solid #ffffff; }
     
-    /* Container voor resultaat/berekening ook wit gemaakt met doorlopende rand */
     .tab-content-container {
       background: var(--card-blue-bg); border: 1px solid var(--border-blue); border-radius: 0 0 12px 12px; padding: 20px 16px; text-align: left; box-sizing: border-box; width: 100%; margin-top: -1px; position: relative; z-index: 2;
     }
@@ -129,7 +165,6 @@
     .btn-install:hover { background: var(--primary-hover); }
     .ios-box { background: #e9ecef; color: #333; font-size: 0.85rem; text-align: center; line-height: 1.4; display: none; margin-top: 8px; }
 
-    /* Type selectie knoppen voor QR / Streepjescode */
     .code-type-selector { display: flex; gap: 0; margin-bottom: 0; width: 100%; box-sizing: border-box; }
     .code-type-btn {
       flex: 1; padding: 10px; border: 1px solid var(--border-blue); background: #e9ecef;
@@ -137,7 +172,6 @@
     }
     .code-type-btn.active { background: #ffffff; color: var(--primary); border-color: var(--border-blue); border-bottom: 1px solid #ffffff; }
 
-    /* Scan knop styling */
     .btn-scan {
       background: #28a745; color: white; border: none; border-radius: 8px;
       padding: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; width: 100%; box-sizing: border-box;
@@ -145,7 +179,6 @@
     }
     .btn-scan:hover { background: #218838; }
 
-    /* Grote weergave voor codes */
     .code-display-box {
       background: #ffffff; border: 1px solid var(--border-blue); border-radius: 12px;
       padding: 24px 16px; text-align: center; min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box;
@@ -163,9 +196,7 @@
     .code-section.active { display: block; }
   </style>
 
-  <!-- JsBarcode library voor Code 128 streepjescodes -->
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-  <!-- Tesseract.js voor tekstherkenning (OCR) van cijferreeksen / ordernummers -->
   <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
 
   <script>
@@ -178,15 +209,33 @@
         if (!refreshing) { refreshing = true; window.location.reload(); }
       });
     }
+
+    // Verberg het geanimeerde splash screen als de pagina klaar is met laden
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        if (splash) splash.classList.add('hidden');
+      }, 500);
+    });
   </script>
 </head>
 <body>
 
+<!-- GEANIMEERD SPLASH SCREEN OVERLAY -->
+<div id="splash-screen">
+  <svg class="splash-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="45" fill="white" opacity="0.2"/>
+    <path d="M30 35H70M30 50H70M30 65H50" stroke="white" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="68" cy="65" r="5" fill="white"/>
+  </svg>
+  <div class="splash-spinner"></div>
+</div>
+
 <div class="card">
   <div class="header-container">
     <div class="header-branding">
-      <img src="logo.png" alt="Logo" class="header-logo">
-      <img src="logotekst.png" alt="Product correctie calculator" class="header-text-img">
+      <img src="logo.png" alt="Logo" class="header-logo" onerror="this.style.display='none'">
+      <img src="logotekst.png" alt="Product correctie calculator" class="header-text-img" onerror="this.style.display='none'">
     </div>
     <div class="header-buttons">
       <button type="button" id="settingsBtn" class="btn-header-action" onclick="toggleSettings()" title="Instellingen factoren">⚙️</button>
@@ -385,7 +434,6 @@
     </div>
 
     <div style="background: #ffffff; border: 1px solid var(--border-blue); border-radius: 0 0 12px 12px; padding: 16px; margin-top: -1px;">
-      <!-- Knop om foto te maken van een ordernummer/cijferreeks -->
       <button type="button" id="scanBtn" class="btn-scan" onclick="startCameraScan()">
         📷 Scan ordernummer / cijfers via foto
       </button>
@@ -396,7 +444,6 @@
         <input type="text" id="codeTextInput" placeholder="Typ of scan een code..." oninput="generateCodes()">
       </div>
 
-      <!-- Grote weergave box -->
       <div class="code-display-box">
         <div id="barcodeSection" class="code-section active">
           <svg id="barcodeSvg" style="display:none;"></svg>
@@ -408,7 +455,6 @@
       </div>
     </div>
 
-    <!-- Extra datum- en Juliaanse dag weergave -->
     <hr style="border:0; border-top: 1px solid var(--border-blue); margin: 16px 0;">
 
     <div style="background: #ffffff; border: 1px solid var(--border-blue); border-radius: 12px; padding: 14px 16px;">
@@ -562,7 +608,6 @@
   function updateDateInformation() {
     const now = new Date();
     
-    // 1. Juliaanse dag berekenen (dag van het jaar)
     const startOfYear = new Date(now.getFullYear(), 0, 0);
     const diff = now - startOfYear;
     const oneDay = 1000 * 60 * 60 * 24;
@@ -570,11 +615,9 @@
     
     document.getElementById('julianDayValue').innerText = dayOfYear;
 
-    // 2. Datum vandaag + 25 dagen berekenen
     const futureDate = new Date();
     futureDate.setDate(now.getDate() + 25);
     
-    // Formatteren naar Nederlands formaat (bijv. 15-09-2026)
     const formattedDate = futureDate.toLocaleDateString('nl-NL', {
       day: '2-digit',
       month: '2-digit',
