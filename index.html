@@ -32,7 +32,7 @@
     
     .header-container { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; text-align: left; }
     .header-branding { display: flex; align-items: center; gap: 12px; }
-    .header-logo { height: 65px; width: auto; object-fit: contain; flex-shrink: 0; }
+    .header-logo { height: 65px; width: auto; object-fit: contain; flex-shrink: 0; cursor: pointer; }
     .header-text-img { height: 38px; width: auto; object-fit: contain; }
     .header-buttons { display: flex; gap: 6px; }
     .btn-header-action {
@@ -179,8 +179,8 @@
 <div class="card">
   <div class="header-container">
     <div class="header-branding">
-      <img src="logo.png" alt="Logo" class="header-logo" onerror="this.style.display='none'">
-      <img src="logotekst.png" alt="Product correctie calculator" class="header-text-img" onerror="this.style.display='none'">
+      <img src="logo.png" alt="Logo" id="headerLogo" class="header-logo" onclick="cycleLogo()" onerror="this.style.display='none'">
+      <img src="logotekst.png" alt="Product correctie calculator" id="headerTextImg" class="header-text-img" onerror="this.style.display='none'">
     </div>
     <div class="header-buttons">
       <button type="button" id="settingsBtn" class="btn-header-action" onclick="toggleSettings()" title="Instellingen factoren">⚙️</button>
@@ -428,6 +428,22 @@
 
 <script>
   let computedActualTotal = 0, originalBatchSize = null, isApplied = false;
+  let logoIndex = 0;
+  const logos = ['logo.png', 'logo2.png', 'logo3.png', 'logo4.png'];
+
+  function cycleLogo() {
+    logoIndex = (logoIndex + 1) % logos.length;
+    const logoImg = document.getElementById('headerLogo');
+    const textImg = document.getElementById('headerTextImg');
+    
+    logoImg.src = logos[logoIndex];
+    
+    if (logoIndex === 0) {
+      textImg.style.display = 'inline-block';
+    } else {
+      textImg.style.display = 'none';
+    }
+  }
 
   function toggleSettings() {
     const password = prompt("Voer het wachtwoord in om de instellingen te openen:");
